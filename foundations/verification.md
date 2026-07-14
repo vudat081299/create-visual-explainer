@@ -36,6 +36,10 @@ Before sending any educational/technical content, walk through these. Don't skip
 - [ ] Every annotation verified against actual data ("← peak at 47" → really at epoch 47?)
 - [ ] Every claimed feature in the caption visible in the rendered plot
 
+### Structure / layout
+- [ ] The page's macro-layout matches the knowledge's intrinsic shape (`foundations/structure.md`) — a process isn't laid out as an unordered set, a comparison isn't split into sequential essays, a hierarchy isn't flattened into a peer list
+- [ ] A reader inferring the relationship between the parts *from the layout alone* would infer the true one — the silent structure self-check; it produces no line in the reply
+
 ### Notation / consistency
 - [ ] Every symbol used means exactly one thing on the page
 - [ ] Every Greek letter introduced has a stated role

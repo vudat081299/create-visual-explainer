@@ -1,6 +1,6 @@
 {
   "skill_name": "create-visual-explainer",
-  "version": "1.3",
+  "version": "1.4",
   "purpose": "Verify the skill (a) triggers on the right prompts and not on wrong ones, (b) loads the right reference files for each loadout, (c) produces output that follows rules 1-16, (d) does NOT trigger anti-patterns. Includes both positive and negative trigger tests.",
   "changelog_v1_2": "Migrated reference paths from old `references/*` flat layout to current 3-bucket layout (`foundations/`, `components/`, `usecases/`).",
   "schema_notes": "Each eval has positive `success_criteria` (rules that must hold) and negative `failure_criteria` (anti-patterns that must NOT appear). Criteria are written so most can be auto-checked with grep / DOM parse / regex; mark with `auto: true` if scriptable.",
@@ -644,12 +644,79 @@
           "check": "regex_inverse: linear-gradient.*(#8|purple).*blue"
         }
       ]
+    },
+    {
+      "id": 8,
+      "name": "comparison-optimizers-facing-columns",
+      "type": "positive-but-tests-rule-17",
+      "domains_tested": [
+        "math-ds",
+        "structure-first"
+      ],
+      "loadout_tested": "Default learn-everything + foundations/structure.md; tests rule 17 (layout mirrors shape — a comparison must be laid out as facing columns / a comparison panel, not as sequential prose sections)",
+      "purpose": "User asks to compare several options across the SAME criteria — a comparison shape. Skill must derive a facing-column layout (attributes as rows, options across, eye moves along a row) on its own, NOT lay each option out as an independent sequential section that forces the reader to compare from memory (the 'comparison shown as sequential prose' structural lie, structure.md §1). The prompt names no format on purpose — deriving the shape is the thing under test.",
+      "references_should_be_loaded": [
+        "foundations/tokens.md",
+        "components/core.md",
+        "foundations/structure.md",
+        "usecases/math-learning.md",
+        "foundations/pedagogy.md",
+        "foundations/verification.md"
+      ],
+      "prompt": "Dùng skill create-visual-explainer: Tạo 1 trang HTML so sánh 3 optimizer SGD, Adam, RMSprop trên cùng bộ tiêu chí — update rule, tốc độ hội tụ, độ nhạy với learning rate, chi phí bộ nhớ, và khi nào nên chọn cái nào. Tôi cần nhìn được sự khác biệt giữa 3 cái theo TỪNG tiêu chí (đặt cạnh nhau để so), không cần slider.",
+      "success_criteria": [
+        {
+          "text": "Skill triggers",
+          "auto": false
+        },
+        {
+          "text": "The 3 optimizers sit on ONE comparison surface with a shared criteria axis — a comparison table or facing columns where the optimizers are the columns and the criteria are the rows (facing-column comparison, structure.md §2)",
+          "auto": true,
+          "check": "html: a single <table> (or CSS-grid comparison panel) whose column headers include 'SGD', 'Adam' and 'RMSprop' AND whose row labels include ≥3 of the named criteria"
+        },
+        {
+          "text": "One criterion can be scanned across all 3 optimizers by reading along a single row (attributes = rows, options = columns) — not by jumping between sections",
+          "auto": false
+        },
+        {
+          "text": "NO slider / interactive demo (user said 'không cần slider')",
+          "auto": true,
+          "check": "html: zero input[type=range]"
+        },
+        {
+          "text": "Each optimizer's update rule shown concretely (rule 12); a small per-option formula nested inside its cell/column is fine (structure.md §3 nesting)",
+          "auto": false
+        },
+        {
+          "text": "Verification trail line at end",
+          "auto": true
+        }
+      ],
+      "failure_criteria": [
+        {
+          "text": "STRUCTURAL LIE (rule 17): laid out as 3 sequential sections — SGD in full, then Adam in full, then RMSprop in full — forcing the reader to hold one optimizer in memory while reading the next, with no shared comparison surface (structure.md §1, the 'comparison shown as sequential prose' case)",
+          "auto": true,
+          "check": "html: ≥3 sibling <h2>/<section> each headed by a single optimizer name AND no comparison <table>/grid pairing the criteria against all three"
+        },
+        {
+          "text": "Optimizers shown as parallel independent cards with no shared criteria axis, so a given criterion cannot be traced across all three",
+          "auto": false
+        },
+        {
+          "text": "Adds quiz / sidenote / reading-progress unprompted (§2C violation)",
+          "auto": true,
+          "check": "html_inverse: no .quiz, no .sidenote, no .reading-progress"
+        }
+      ],
+      "notes": [
+        "v1.14: added with rule 17 / foundations/structure.md. Page-level twin of eval 4 (which guards rule 13 at the per-explanation level); eval 8 guards rule 17 at the macro-layout level. Prompt states the comparison intent ('theo TỪNG tiêu chí', 'đặt cạnh nhau để so') without prescribing 'table' — the skill must pick the facing-column shape itself."
+      ]
     }
   ],
   "running_evals": {
     "in_claude_ai": "Run each prompt in a fresh conversation. Score qualitatively against success/failure criteria; for `auto: true` criteria, run a script after the output is saved. If any criterion fails, identify which reference file's rule was missed and refine the relevant file.",
     "iteration_loop": [
-      "1. Run all 6 prompts in fresh conversations (one prompt per conversation to avoid context bleed)",
+      "1. Run all 8 prompts in fresh conversations (one prompt per conversation to avoid context bleed)",
       "2. Save each output to evals/results/iteration-N/eval-K/output.html (or .md/.txt for negative tests)",
       "3. Run scripts/check_assertions.py against each output for `auto: true` criteria",
       "4. Manually score the `auto: false` criteria",
@@ -658,14 +725,15 @@
       "7. Edit the relevant file(s)",
       "8. Re-run from step 1"
     ],
-    "stopping_condition": "All 6 evals pass ≥80% of success_criteria. Failure_criteria triggered: ZERO across all evals. Negative-trigger evals (5, 6): skill loaded ZERO times.",
+    "stopping_condition": "All 8 evals pass ≥80% of success_criteria. Failure_criteria triggered: ZERO across all evals. Negative-trigger evals (5, 6): skill loaded ZERO times.",
     "minimum_runs_per_prompt": 3,
     "rationale_for_3_runs": "LLM output is stochastic; running each prompt 3 times and reporting median pass-rate is more reliable than a single run."
   },
   "future_work": [
-    "Add eval 8: 'industrial dial' test — dashboard request that should use dense mode, NOT polished SaaS (per §3 dial table)",
-    "Add eval 9: very-short request (≤2 sentences) — does skill respect §2C clarification protocol?",
+    "Add eval 9: 'industrial dial' test — dashboard request that should use dense mode, NOT polished SaaS (per §3 dial table)",
+    "Add eval 10: very-short request (≤2 sentences) — does skill respect §2C clarification protocol?",
     "Move eval `ios-model-details-screen` from this file to the sister skill `industrial-data-ios` evals (was incorrectly in v1.0 of this file)"
   ],
-  "changelog_v1_3": "Fixed 6 lingering references to the pre-3-bucket flat filenames (patterns-math.md, patterns-explainer.md, patterns-charts.md, patterns-numeric.md, patterns-navigation.md, patterns-longform-nav, patterns-asides, components.md) in criteria text — references_should_be_loaded arrays were already correct from v1.2, only prose mentions inside criteria text were stale. Prepended explicit skill invocation to eval 2 and eval 4 prompts: SKILL.md's description was narrowed in v1.9 to exclude bare 'làm dashboard' / 'giải thích X' / 'tạo trang HTML' without explicit invocation or a clear study-note framing — these two prompts now match an allowed trigger path instead of sitting in the excluded zone the narrowing was written for. Added eval 7 (subject-theming-chemistry-redox) to cover the v1.10 theming feature (foundations/palettes.md + foundations/backgrounds.md); its core assertion is the identity-vs-semantic law, not just 'does a color change'. Renumbered the eval-7/8 placeholders in future_work to 8/9 since 7 is now a real eval."
+  "changelog_v1_3": "Fixed 6 lingering references to the pre-3-bucket flat filenames (patterns-math.md, patterns-explainer.md, patterns-charts.md, patterns-numeric.md, patterns-navigation.md, patterns-longform-nav, patterns-asides, components.md) in criteria text — references_should_be_loaded arrays were already correct from v1.2, only prose mentions inside criteria text were stale. Prepended explicit skill invocation to eval 2 and eval 4 prompts: SKILL.md's description was narrowed in v1.9 to exclude bare 'làm dashboard' / 'giải thích X' / 'tạo trang HTML' without explicit invocation or a clear study-note framing — these two prompts now match an allowed trigger path instead of sitting in the excluded zone the narrowing was written for. Added eval 7 (subject-theming-chemistry-redox) to cover the v1.10 theming feature (foundations/palettes.md + foundations/backgrounds.md); its core assertion is the identity-vs-semantic law, not just 'does a color change'. Renumbered the eval-7/8 placeholders in future_work to 8/9 since 7 is now a real eval.",
+  "changelog_v1_4": "Added eval 8 (comparison-optimizers-facing-columns) to cover rule 17 / foundations/structure.md — the macro-layout-mirrors-shape rule added in skill v1.14. Page-level counterpart to eval 4 (which guards rule 13 at the per-explanation level): eval 8 hands the skill a comparison-shaped task described only by intent (no 'make a table' instruction) and checks the output is a facing-column comparison surface, not three sequential per-optimizer essays (the 'comparison shown as sequential prose' structural lie). Renumbered the two future_work placeholders (industrial-dial, very-short-request) from 8/9 to 9/10 since 8 is now a real eval. Corrected eval-count references in running_evals ('all 6' -> 'all 8') that were left stale when eval 7 was added in v1.3."
 }

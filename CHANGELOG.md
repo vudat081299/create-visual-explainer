@@ -2,6 +2,40 @@
 
 > Older entries (v1.1–v1.4) live in `CHANGELOG-archive.md` to keep this file scannable. v1.5+ stays here as the active history.
 
+## v1.14 (2026-07-14) — Structure-first layout: add `foundations/structure.md` + rule 17
+
+User direction: when building any learning page, Claude must actively derive the most logical, coherent macro-layout for the *specific* knowledge — and silently self-check it — instead of defaulting into a template or a task-type bucket. This version adds that missing layer as a new foundation and wires it into both the build path and the verify path.
+
+**New file — `foundations/structure.md`** (the page-structure analogue of `foundations/plot-quality.md`): the "a layout can lie" principle, the name-the-shape → match-the-layout method, the full shape→layout table (8 shapes incl. cycle) with a "the lie if you mismatch" column, mixed/nested handling, and a silent §4 self-check (name test · match test · spine-as-a-sentence test). It lives in `foundations/` — not as a `pedagogy.md` subsection — on purpose: macro-layout is a construction-time *structural* concern (the twin of chart integrity), not a prose/explanation concern, so it belongs beside `plot-quality.md`, loads on every educational page, and reads as a build-time decision rather than a writing tip.
+
+Verify is **silent self-check only** (user's explicit choice): no trail line, no ask-before-build, except when two shapes genuinely compete → §2C. Net: **1 new file (`foundations/structure.md`) wired into 5 surfaces + 1 new rule (17) + 1 new eval (8); `pedagogy.md` unchanged from v1.13.**
+
+### Wired in — `foundations/structure.md`
+
+- **§1 skill map**: new `foundations/` row — "derive the macro-layout from the *shape* of the knowledge … a mismatched layout is a *structural lie*", `Load when: Baseline for any educational page — before picking usecases`.
+- **§1 loadouts**: added to the default learn-everything "Always" set and to the "DS learning page" row.
+- **§1 default path**: **structure-first** named as the DEFAULT *first build move* (ahead of §2D disclosure and §2E tooling), so build-time primacy sits where the approach is chosen — not buried in an appended rule.
+- **`MAP.md`**: added to the `foundations/` tree (count 6→7) and a full detail entry (§1–§4) alongside the other foundations files.
+
+### Added — `SKILL.md` §2B rule 17 "Page structure mirrors the shape of the knowledge"
+
+Seventh content rule (§2B now 7 rules, was 6). Page-level counterpart to rule 13's per-explanation form choice: name the shape → build the layout that expresses it. Framed as a *structural lie* — the layout-level analogue of a chart that misleads about its data (a truncated axis, a dual axis; `plot-quality.md` §3–§4); it is to page layout what rule 14 is to plots. Points to `foundations/structure.md`.
+
+### Changed — `SKILL.md` workflow + anti-patterns
+
+- §3 workflow: step 4 renamed "Plan structure, content + disclosure split" — diagnose the shape and derive the macro-layout *first* (rule 17 + `structure.md`), then apply rules 11-13 within it; step 9 self-test gains the silent `structure.md` §4 structure-match check (explicitly no line in the reply).
+- Anti-patterns (content): a macro-layout that contradicts the knowledge's shape → structural lie.
+
+### Changed — `foundations/verification.md`
+
+- §1 pre-output checklist: new **Structure / layout** subsection carrying the silent self-check, pointing to `structure.md` (a process isn't laid out as an unordered set; a comparison isn't split into sequential essays; a hierarchy isn't flattened into a peer list).
+
+### Fixes applied during finalization
+
+- **`structure.md` Quick map**: corrected the §2/§3/§4 line ranges to `§2 L27–46 · §3 L47–55 · §4 L56–66` — the earlier ranges pointed past their sections, and §4's end (L78) ran 12 lines beyond the 66-line file.
+- **rule 17 citation**: the *structural lie* example previously cited "(rule 14)" for a truncated axis, but rule 14 is the axis-*labels* rule; the truncated/dual-axis example now points to `plot-quality.md` §3–§4, with the rule-14 parallel kept correctly ("to page layout what rule 14 is to plots").
+- **`evals/`**: added **eval 8** (`comparison-optimizers-facing-columns`, `positive-but-tests-rule-17`) — the page-level twin of eval 4; a comparison-shaped prompt described only by *intent* (no "make a table"), checking the output is a facing-column comparison surface rather than three sequential per-optimizer essays. Bumped `evals.json` to v1.4, renumbered its two `future_work` placeholders 8/9→9/10, and corrected the stale "all 6 evals" → "all 8".
+
 ## v1.13 (2026-07-10) — Reader-tooling layer: notes panel + attention support (ADHD/PDHD)
 
 User direction: the skill had no guidance for the *reader-tooling* layer — the notes feature, and the attention-support affordances (dim non-active sections, per-section done checkbox, progress line) that a real dense page needs. A reference page (`research.html`) shipped all of them; nothing in the skill described how or why. Root cause: the skill covered *content* (pedagogy) and *depth layout* (progressive disclosure) but never *sustained attention* — the axis that decides whether a dense page gets finished at all. Net: **1 new file, 1 new section, rules added in 3 files; `evals/` untouched.**

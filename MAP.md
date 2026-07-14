@@ -22,9 +22,10 @@ create-visual-explainer/
 ├── evals/
 │   ├── README.md                  # Hướng dẫn chạy eval
 │   └── evals.json                 # Test prompts
-├── foundations/                   # 6 file — nguyên lý xuyên suốt
+├── foundations/                   # 7 file — nguyên lý xuyên suốt
 │   ├── tokens.md
 │   ├── pedagogy.md
+│   ├── structure.md
 │   ├── verification.md
 │   ├── plot-quality.md
 │   ├── palettes.md
@@ -88,6 +89,15 @@ Vai trò: file duy nhất Claude load mặc định khi skill trigger. Chứa:
 - §7 Comprehension-first form (chọn dạng theo working memory, không theo aesthetic)
 - §8 Visual-first vs prose-first
 - §9 Self-test pre-output (19-year-old test)
+
+#### `foundations/structure.md` (~65 dòng)
+**Vai trò**: suy ra bố cục macro của trang từ *hình dạng* của kiến thức — đối ứng cấp-trang của `plot-quality.md`; layout lệch hình dạng = *structural lie*.
+**Load khi**: bất kỳ educational page nào, **đọc TRƯỚC khi chọn usecases**.
+**Quick map sections**:
+- §1 Nguyên tắc — một layout có thể nói dối (structural lie, đối ứng trục-y-cắt)
+- §2 Gọi tên hình dạng → match layout (bảng shape→layout + cột "lời nói dối nếu lệch"; 8 hình dạng gồm cả cycle)
+- §3 Hình dạng lai & lồng nhau (dominant shape làm spine, sub-shape trong section con)
+- §4 Self-check im lặng trước khi style (name / match / spine-as-a-sentence test)
 
 #### `foundations/verification.md` (~282 dòng)
 **Vai trò**: quy trình verify math/code/citation trước khi output, và format verification trail.
