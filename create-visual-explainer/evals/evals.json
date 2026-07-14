@@ -1,0 +1,671 @@
+{
+  "skill_name": "create-visual-explainer",
+  "version": "1.3",
+  "purpose": "Verify the skill (a) triggers on the right prompts and not on wrong ones, (b) loads the right reference files for each loadout, (c) produces output that follows rules 1-16, (d) does NOT trigger anti-patterns. Includes both positive and negative trigger tests.",
+  "changelog_v1_2": "Migrated reference paths from old `references/*` flat layout to current 3-bucket layout (`foundations/`, `components/`, `usecases/`).",
+  "schema_notes": "Each eval has positive `success_criteria` (rules that must hold) and negative `failure_criteria` (anti-patterns that must NOT appear). Criteria are written so most can be auto-checked with grep / DOM parse / regex; mark with `auto: true` if scriptable.",
+  "stopping_condition": "All evals pass ≥80% of success_criteria with ZERO failure_criteria triggered AND ZERO negative-trigger evals incorrectly trigger the skill.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "explainer-gradient-descent",
+      "type": "positive",
+      "domains_tested": [
+        "math-ds",
+        "interactive-explainer",
+        "charts"
+      ],
+      "loadout_tested": "Default learn-everything path (interactive)",
+      "references_should_be_loaded": [
+        "foundations/tokens.md",
+        "components/core.md",
+        "usecases/math-learning.md",
+        "usecases/interactive-explainer.md",
+        "components/charts.md",
+        "foundations/pedagogy.md",
+        "foundations/verification.md",
+        "foundations/plot-quality.md"
+      ],
+      "prompt": "Tạo cho mình 1 trang HTML giải thích về gradient descent. Cần có slider để chỉnh learning rate (0.001 đến 1.0) và momentum (0 đến 0.99), khi kéo slider thì có một animation cho thấy quỹ đạo của gradient descent trên đồ thị contour của hàm f(x,y) = x² + 5y². Có cả phần định nghĩa, công thức cập nhật, và một warning box giải thích vì sao learning rate quá lớn sẽ overshoot.",
+      "success_criteria": [
+        {
+          "text": "Skill triggers (Claude reads SKILL.md before responding)",
+          "auto": false
+        },
+        {
+          "text": "Loads tokens.md + components/core.md + usecases/math-learning.md + usecases/interactive-explainer.md + components/charts.md (≥4 of 5)",
+          "auto": false
+        },
+        {
+          "text": "Page header has eyebrow + Bebas Neue title + subtitle composition",
+          "auto": true,
+          "check": "dom: 3 elements before first <h2>, title uses Bebas Neue"
+        },
+        {
+          "text": "Title contains exactly ONE accent-colored keyword (rule 5)",
+          "auto": true,
+          "check": "regex: in <h1>, exactly one <span> with class containing 'accent' or color style"
+        },
+        {
+          "text": "Sliders driving live SVG/canvas (rule from usecases/interactive-explainer.md §2)",
+          "auto": true,
+          "check": "html_contains: input[type=range] AND addEventListener AND <svg> OR <canvas>"
+        },
+        {
+          "text": "Slider value echo via <output> in mono font",
+          "auto": true,
+          "check": "html_contains: <output> AND font-mono OR JetBrains"
+        },
+        {
+          "text": "Definition block uses .definition class with green left-border (or equivalent)",
+          "auto": true,
+          "check": "css_contains: .definition AND --accent-green"
+        },
+        {
+          "text": "Update equation rendered with KaTeX inside .equation container",
+          "auto": true,
+          "check": "html_contains: katex.min.js AND class*='equation'"
+        },
+        {
+          "text": "Warning section uses .warning class with red left-border",
+          "auto": true,
+          "check": "css_contains: .warning AND --accent-red"
+        },
+        {
+          "text": "Body grid texture (body::before with repeating-linear-gradient using --hairline)",
+          "auto": true,
+          "check": "css_contains: body::before AND repeating-linear-gradient AND --hairline"
+        },
+        {
+          "text": "Fonts: Bebas Neue + DM Sans + JetBrains Mono loaded from Google Fonts (rule 4)",
+          "auto": true,
+          "check": "html_contains: fonts.googleapis.com AND Bebas+Neue AND DM+Sans AND JetBrains+Mono"
+        },
+        {
+          "text": "Triple-opacity rule applied (rule 1: 0.08-0.10 bg, 0.20-0.25 border)",
+          "auto": true,
+          "check": "regex: rgb\\([^)]*\\/ 0\\.0[89]|0\\.1[05]?\\) for fills AND 0\\.2[0-5] for borders"
+        },
+        {
+          "text": "Tabular numerals on slider output and equation numbers (rule 3)",
+          "auto": true,
+          "check": "css_contains: font-feature-settings.*tnum OR font-variant-numeric.*tabular-nums"
+        },
+        {
+          "text": "No box-shadow on cards or chrome (rule 2)",
+          "auto": true,
+          "check": "regex_inverse: box-shadow on .card OR .stat OR .definition (only on overlays)"
+        },
+        {
+          "text": "Animation respects prefers-reduced-motion (rule 9)",
+          "auto": true,
+          "check": "css_contains: @media (prefers-reduced-motion: reduce)"
+        },
+        {
+          "text": "Worked numerical example BEFORE formal update equation (rule 12)",
+          "auto": false
+        },
+        {
+          "text": "Misconception warning explains overshoot mechanism, not just 'be careful' (pedagogy.md §4)",
+          "auto": false
+        },
+        {
+          "text": "Verification trail line at end of deliverable (rule 16)",
+          "auto": true,
+          "check": "in last 30 lines of conversation: 'Verified:' or 'Đã verify:'"
+        }
+      ],
+      "failure_criteria": [
+        {
+          "text": "Uses Inter / Roboto / system-ui as primary font",
+          "auto": true,
+          "check": "css_contains: font-family.*Inter|Roboto AND NOT inside fallback chain"
+        },
+        {
+          "text": "Centered hero with 3 feature cards (AI-slop layout)",
+          "auto": false
+        },
+        {
+          "text": "Purple-blue synthwave gradients in chrome",
+          "auto": true,
+          "check": "css_contains: linear-gradient.*(#8|purple).*blue OUTSIDE .chart-* containers"
+        },
+        {
+          "text": "box-shadow used for card elevation",
+          "auto": true,
+          "check": "css_contains: \\.card[^{]*\\{[^}]*box-shadow"
+        },
+        {
+          "text": "Sliders without text echo",
+          "auto": true,
+          "check": "html_contains: input[type=range] WITHOUT <output> nearby"
+        },
+        {
+          "text": "Equation as plain text instead of KaTeX/MathJax",
+          "auto": true,
+          "check": "regex: 'x_{t+1}' or '\\theta -' as plain text without latex delimiters"
+        },
+        {
+          "text": "Emoji icons in production positions (rule from anti-patterns)",
+          "auto": true,
+          "check": "regex_inverse: emoji unicode in <button> OR .icon OR .badge"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "ml-training-dashboard",
+      "type": "positive",
+      "domains_tested": [
+        "dashboard",
+        "charts",
+        "navigation"
+      ],
+      "loadout_tested": "Dashboard / analytics UI",
+      "references_should_be_loaded": [
+        "foundations/tokens.md",
+        "components/core.md",
+        "components/charts.md",
+        "components/numeric.md",
+        "components/dashboard-chrome.md",
+        "components/navigation.md",
+        "foundations/plot-quality.md"
+      ],
+      "prompt": "Using the create-visual-explainer skill: Build a model training dashboard. Left sidebar navigation with 5 sections (Overview, Models, Datasets, Experiments, Metrics). Main area: 3 stat cards in a row showing Validation Accuracy (94.2%), Training Loss (0.18), Epochs Completed (47/100). Below them, a line chart of train loss vs validation loss over epochs. Right side has a confusion-matrix heatmap. Add a top-right theme toggle for dark/light mode.",
+      "success_criteria": [
+        {
+          "text": "Skill triggers",
+          "auto": false
+        },
+        {
+          "text": "Loads tokens.md + components/core.md + components/charts.md + components/numeric.md + components/navigation.md (≥4 of 5)",
+          "auto": false
+        },
+        {
+          "text": "Sidebar uses .sidebar pattern with mono uppercase section labels",
+          "auto": true,
+          "check": "css_contains: .sidebar AND text-transform.*uppercase AND font-mono"
+        },
+        {
+          "text": "Active sidebar link uses --accent-green tinted bg + green text",
+          "auto": true,
+          "check": "css_contains: .nav-link\\.active|aria-current.*page AND --accent-green"
+        },
+        {
+          "text": "Stat cards: mono uppercase label + Bebas Neue oversized value + colored delta",
+          "auto": true,
+          "check": "css_contains: .stat AND Bebas Neue AND .stat-delta"
+        },
+        {
+          "text": "Stat values have tabular-nums (rule 3)",
+          "auto": true,
+          "check": "css: .stat-value with font-variant-numeric or tnum"
+        },
+        {
+          "text": "Line chart uses --cat-1 (green) and --cat-2 (blue) for two series",
+          "auto": true,
+          "check": "html: stroke values reference --cat-1 and --cat-2"
+        },
+        {
+          "text": "Chart container has isolation:isolate",
+          "auto": true,
+          "check": "css_contains: .chart-container.*isolation:\\s*isolate"
+        },
+        {
+          "text": "Chart axes use mono font micro size in --text-muted",
+          "auto": true,
+          "check": "css: axis text uses font-mono AND --text-muted"
+        },
+        {
+          "text": "Heatmap uses sequential or diverging palette (NOT categorical)",
+          "auto": true,
+          "check": "html: confusion matrix references --seq-* or --div-* tokens"
+        },
+        {
+          "text": "Theme toggle works via [data-theme='light'] attribute swap",
+          "auto": true,
+          "check": "js_contains: setAttribute.*data-theme AND css: [data-theme=\"light\"]"
+        },
+        {
+          "text": "Light mode uses darkened accents (e.g. --accent-green #00e5a0 → #008060)",
+          "auto": true,
+          "check": "css: [data-theme=\"light\"] redefines --accent-* with hex values different from dark"
+        },
+        {
+          "text": "Sidebar collapses to drawer ≤1024px",
+          "auto": true,
+          "check": "css_contains: @media.*max-width.*1024 AND .sidebar transform/display"
+        },
+        {
+          "text": "Triple-opacity for stat-card delta + active link (rule 1, 8)",
+          "auto": false
+        },
+        {
+          "text": "Plot has axis labels with units + ≥1 stated finding (rule 14, plot-quality.md §2)",
+          "auto": false
+        },
+        {
+          "text": "Verification trail at end",
+          "auto": true,
+          "check": "grep last 30 lines: Verified:"
+        }
+      ],
+      "failure_criteria": [
+        {
+          "text": "Uses box-shadow for card elevation",
+          "auto": true
+        },
+        {
+          "text": "Material Design / Tailwind defaults instead of skill tokens",
+          "auto": false
+        },
+        {
+          "text": "Stat big number uses body font instead of Bebas Neue",
+          "auto": true,
+          "check": "css: .stat-value font-family does NOT contain Bebas"
+        },
+        {
+          "text": "Default Chart.js / Recharts colors instead of --cat-* tokens",
+          "auto": false
+        },
+        {
+          "text": "Light mode keeps vibrant dark-mode accents (fail WCAG on white bg)",
+          "auto": false
+        },
+        {
+          "text": "Pie chart used for confusion matrix (anti-pattern from plot-quality §1)",
+          "auto": true,
+          "check": "html_contains: pie OR doughnut for confusion"
+        },
+        {
+          "text": "Hamburger sidebar without eyebrow-style section labels",
+          "auto": false
+        }
+      ],
+      "notes": [
+        "v1.3: prepended explicit skill invocation — the v1.9-narrowed SKILL.md description excludes bare 'làm dashboard' without it; the dashboard loadout itself is unchanged and still a supported genre (see SKILL.md §1 foundations table)."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "longform-study-note-bayes",
+      "type": "positive",
+      "domains_tested": [
+        "math-ds",
+        "longform",
+        "navigation"
+      ],
+      "loadout_tested": "DS learning page / longform study note",
+      "references_should_be_loaded": [
+        "foundations/tokens.md",
+        "components/core.md",
+        "usecases/math-learning.md",
+        "usecases/longform-study.md",
+        "components/asides.md",
+        "foundations/pedagogy.md",
+        "foundations/verification.md"
+      ],
+      "prompt": "Tạo cho tôi 1 note ôn tập Bayesian inference dạng longform 6-7 section: (1) intuition cartoon trước, (2) mechanism dùng worked example với data thực (medical test 1% prevalence, 99% sensitivity, 95% specificity), (3) công thức Bayes formal, (4) prior/posterior visualization (1 chart static, không cần interactive), (5) common misconception (base rate fallacy), (6) self-check quiz 3 câu có collapsible solution, (7) further reading. Không cần dark/light toggle, default dark là OK.",
+      "success_criteria": [
+        {
+          "text": "Skill triggers",
+          "auto": false
+        },
+        {
+          "text": "Loads usecases/longform-study.md + components/asides.md + usecases/math-learning.md + foundations/pedagogy.md + foundations/verification.md (baseline)",
+          "auto": false
+        },
+        {
+          "text": "Right-rail sticky TOC (≥6 H2 sections per usecases/longform-study.md §1)",
+          "auto": true,
+          "check": "html_contains: nav.toc AND position:sticky AND right rail layout"
+        },
+        {
+          "text": "Layer 1 (cartoon) → Layer 2 (mechanism) → Layer 3 (formula) order respected (rule 11)",
+          "auto": false
+        },
+        {
+          "text": "Worked numerical example with concrete numbers BEFORE Bayes formula (rule 12)",
+          "auto": false
+        },
+        {
+          "text": "Base rate fallacy explained as misconception with .warning box (pedagogy.md §4)",
+          "auto": true,
+          "check": "css_contains: .warning AND prose mentions 'base rate'"
+        },
+        {
+          "text": "Self-check quiz uses .quiz pattern from components/asides.md §4",
+          "auto": true,
+          "check": "html_contains: <details class=\"collapsible\"|.quiz AND <summary>"
+        },
+        {
+          "text": "Collapsible solutions wrapped in <details> with .collapsible class",
+          "auto": true,
+          "check": "html_contains: <details.*collapsible.*<summary>"
+        },
+        {
+          "text": "Static prior/posterior chart has axis labels + units + ≥1 stated finding (rule 14)",
+          "auto": false
+        },
+        {
+          "text": "Body uses 'polished SaaS' dial: looser line-height, larger section gaps (per §3 dial table)",
+          "auto": true,
+          "check": "css: body line-height ≥1.7 AND main section gap ≥80px"
+        },
+        {
+          "text": "Reading-progress bar IS optional and NOT included unless asked (§2C optional list)",
+          "auto": true,
+          "check": "html_inverse: NO .reading-progress unless prompt asks"
+        },
+        {
+          "text": "Verification trail line at end",
+          "auto": true,
+          "check": "grep last 30 lines: Verified:"
+        }
+      ],
+      "failure_criteria": [
+        {
+          "text": "Formula appears before any cartoon/intuition (formalism-first, violates rule 11)",
+          "auto": false
+        },
+        {
+          "text": "Greek letter without numerical example on next line (rule 12 violation)",
+          "auto": false
+        },
+        {
+          "text": "Page has no TOC despite ≥3 H2 sections",
+          "auto": true,
+          "check": "html: count(<h2>)≥3 AND no nav.toc"
+        },
+        {
+          "text": "Quiz appears WITHOUT user requesting it (skill must respect §2C)",
+          "auto": false,
+          "comment": "in this prompt user DID request quiz, so this is OK; toggle this for negative case"
+        },
+        {
+          "text": "Decorative SVG with no pedagogical content",
+          "auto": false
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "prose-first-entropy-explanation",
+      "type": "positive-but-tests-rule-13",
+      "domains_tested": [
+        "math-ds",
+        "comprehension-first"
+      ],
+      "loadout_tested": "Default learn-everything; tests rule 13 (visual ≠ default)",
+      "purpose": "User asks for a concept where prose IS the shortest path. Skill must NOT force a visual.",
+      "references_should_be_loaded": [
+        "foundations/tokens.md",
+        "components/core.md",
+        "usecases/math-learning.md",
+        "foundations/pedagogy.md",
+        "foundations/verification.md"
+      ],
+      "prompt": "Dùng skill create-visual-explainer: Giải thích entropy trong information theory bằng prose, ngắn gọn (≤500 từ), không cần plot, không cần slider. Tôi chỉ cần 1 trang HTML có công thức Shannon entropy, 1 worked example với coin flip fair vs biased, và intuition về 'lượng surprise trung bình'.",
+      "success_criteria": [
+        {
+          "text": "Skill triggers",
+          "auto": false
+        },
+        {
+          "text": "Output has NO <svg> chart and NO <canvas> (user said 'không cần plot')",
+          "auto": true,
+          "check": "html: zero <svg> with chart-* class AND zero <canvas>"
+        },
+        {
+          "text": "Output has NO slider/interactive demo (user said 'không cần slider')",
+          "auto": true,
+          "check": "html: zero input[type=range]"
+        },
+        {
+          "text": "Worked numerical example: H(fair coin) = 1 bit AND H(biased coin) computed",
+          "auto": true,
+          "check": "html_contains: '1 bit' OR '= 1.0' OR 'H(p=0.5)' AND a second example"
+        },
+        {
+          "text": "Shannon formula H(X) = -Σ p log p rendered with KaTeX",
+          "auto": true,
+          "check": "html_contains: katex AND '\\\\sum' AND '\\\\log'"
+        },
+        {
+          "text": "Intuition layer (Layer 1) BEFORE formula (Layer 3) per rule 11",
+          "auto": false
+        },
+        {
+          "text": "Word count ≤600 (gives 20% buffer over 500)",
+          "auto": true,
+          "check": "stripped text word count ≤600"
+        },
+        {
+          "text": "Verification trail line at end",
+          "auto": true
+        }
+      ],
+      "failure_criteria": [
+        {
+          "text": "Forces a visual when prose is shorter and clearer (rule 13 violation, anti-pattern §5)",
+          "auto": true,
+          "check": "any <svg> chart OR <canvas> present"
+        },
+        {
+          "text": "Includes interactive slider despite user saying 'không cần'",
+          "auto": true,
+          "check": "any input[type=range]"
+        },
+        {
+          "text": "Skips the worked coin-flip example (formalism-first violation)",
+          "auto": false
+        },
+        {
+          "text": "Adds quiz / sidenote / reading progress unprompted (§2C violation)",
+          "auto": true,
+          "check": "html_inverse: no .quiz, no .sidenote, no .reading-progress"
+        }
+      ],
+      "notes": [
+        "v1.3: prepended explicit skill invocation — the v1.9-narrowed SKILL.md description excludes bare 'giải thích X' / generic 'tạo trang HTML' without it."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "negative-trigger-swift-bug-fix",
+      "type": "negative",
+      "domains_tested": [
+        "trigger-discipline"
+      ],
+      "purpose": "Skill must NOT trigger for code-debugging tasks. Tests description boundary.",
+      "prompt": "Fix this Swift code, có bug null pointer khi unwrap optional:\n```swift\nfunc getUser(id: String) -> User {\n    let user = database.fetch(id: id)\n    return user!\n}\n```",
+      "success_criteria": [
+        {
+          "text": "Skill `create-visual-explainer` is NOT consulted (does NOT appear in tool calls / file reads)",
+          "auto": false,
+          "critical": true
+        },
+        {
+          "text": "Claude answers the bug fix directly without loading SKILL.md or any reference file",
+          "auto": false,
+          "critical": true
+        },
+        {
+          "text": "Output is plain code/text, NOT an HTML page",
+          "auto": true,
+          "check": "no <html> OR <!DOCTYPE> in output"
+        }
+      ],
+      "failure_criteria": [
+        {
+          "text": "Skill loads despite being out of scope (description too broad)",
+          "auto": false,
+          "critical": true
+        },
+        {
+          "text": "Output is wrapped in HTML page",
+          "auto": true,
+          "check": "html_contains: <!DOCTYPE OR <html"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "negative-trigger-decline-email",
+      "type": "negative",
+      "domains_tested": [
+        "trigger-discipline"
+      ],
+      "purpose": "Skill must NOT trigger for plain communication tasks.",
+      "prompt": "Viết hộ tôi 1 email từ chối phỏng vấn vị trí senior iOS dev, lịch sự, ngắn gọn. Lý do: đã accept offer khác.",
+      "success_criteria": [
+        {
+          "text": "Skill is NOT consulted",
+          "auto": false,
+          "critical": true
+        },
+        {
+          "text": "Output is plain email text, NOT an HTML page",
+          "auto": true,
+          "check": "no <html> OR <!DOCTYPE>"
+        },
+        {
+          "text": "Claude does NOT add a verification trail (this isn't a deliverable that needs it)",
+          "auto": false
+        }
+      ],
+      "failure_criteria": [
+        {
+          "text": "Skill loads SKILL.md or reference files",
+          "auto": false,
+          "critical": true
+        },
+        {
+          "text": "Email wrapped in HTML page with eyebrow + Bebas Neue title (would be absurd)",
+          "auto": true,
+          "check": "html_contains: Bebas Neue AND <h1>"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "subject-theming-chemistry-redox",
+      "type": "positive",
+      "domains_tested": [
+        "theming",
+        "chemistry",
+        "math-ds"
+      ],
+      "loadout_tested": "Subject identity palette + background texture (foundations/palettes.md + foundations/backgrounds.md, v1.10)",
+      "purpose": "Verify the v1.10 theming feature: subject inferred -> correct data-accent/data-bg pair selected, identity surfaces recolor, and — the part that actually matters — the six semantic accents (success/danger/example) stay fixed and are NOT recolored to match the subject.",
+      "references_should_be_loaded": [
+        "foundations/tokens.md",
+        "foundations/palettes.md",
+        "foundations/backgrounds.md",
+        "components/core.md",
+        "usecases/math-learning.md",
+        "foundations/pedagogy.md",
+        "foundations/verification.md"
+      ],
+      "prompt": "Dùng skill create-visual-explainer: tạo 1 trang giải thích phản ứng oxi hoá - khử (redox) cho người mới học hoá. Cần có: 1 sơ đồ đơn giản minh hoạ electron di chuyển từ chất khử sang chất oxi hoá, định nghĩa rõ 'chất khử' và 'chất oxi hoá', 1 ví dụ cân bằng electron cụ thể (ví dụ Zn + Cu²⁺), và 1 lưu ý về lỗi hay gặp khi cân bằng. Không cần interactive, 1 trang tĩnh là đủ.",
+      "success_criteria": [
+        {
+          "text": "Skill triggers (explicit invocation)",
+          "auto": false
+        },
+        {
+          "text": "Subject inferred as chemistry -> data-accent=\"chemistry\" set on <html>, paired data-bg=\"dots\" per palettes.md preset table (§3)",
+          "auto": true,
+          "check": "html_contains: data-accent=\"chemistry\" AND data-bg=\"dots\""
+        },
+        {
+          "text": "[data-accent=\"chemistry\"] override sets --accent-identity to the orange hue, with a separate light-mode override block",
+          "auto": true,
+          "check": "css_contains: [data-accent=\"chemistry\"] AND --accent-identity:#fb923c AND [data-theme=\"light\"][data-accent=\"chemistry\"]"
+        },
+        {
+          "text": "Eyebrow + title keyword read var(--accent-identity), not a hardcoded accent (palettes.md §2 wiring list)",
+          "auto": true,
+          "check": "css_contains: .eyebrow AND var(--accent-identity)"
+        },
+        {
+          "text": "Focus ring reads var(--accent-identity)",
+          "auto": true,
+          "check": "css_contains: :focus-visible AND var(--accent-identity)"
+        },
+        {
+          "text": "Background texture is the dots variant (radial-gradient + 40px tile), not left as plain default",
+          "auto": true,
+          "check": "css_contains: radial-gradient(var(--hairline) AND background-size: 40px 40px"
+        },
+        {
+          "text": ".definition box still uses --accent-green (semantic meaning is fixed, not themed)",
+          "auto": true,
+          "check": "css_contains: .definition AND --accent-green"
+        },
+        {
+          "text": ".warning box still uses --accent-red",
+          "auto": true,
+          "check": "css_contains: .warning AND --accent-red"
+        },
+        {
+          "text": ".example box still uses --accent-purple",
+          "auto": true,
+          "check": "css_contains: .example AND --accent-purple"
+        },
+        {
+          "text": "Worked example balances a concrete electron count (e.g. Zn/Cu half-reactions) before generalizing",
+          "auto": false
+        },
+        {
+          "text": "Common-mistake note explains the balancing mechanism, not just 'be careful'",
+          "auto": false
+        },
+        {
+          "text": "Verification trail line at end of deliverable (rule 16)",
+          "auto": true,
+          "check": "in last 30 lines of conversation: 'Verified:' or 'Đã verify:'"
+        }
+      ],
+      "failure_criteria": [
+        {
+          "text": "Semantic box (.definition/.warning/.example) recolored to --accent-identity — breaks the identity-vs-semantic law (palettes.md §2)",
+          "auto": true,
+          "check": "regex_inverse: (\\.definition|\\.warning|\\.example)\\s*\\{[^}]*--accent-identity"
+        },
+        {
+          "text": "Default grid texture left in place instead of the chemistry preset's paired dots variant",
+          "auto": true,
+          "check": "regex_inverse: repeating-linear-gradient\\(0deg,\\s*transparent 0 39px"
+        },
+        {
+          "text": "Loud/rainbow/synthwave gradient used for the background instead of the sanctioned monochrome variant",
+          "auto": true,
+          "check": "regex_inverse: linear-gradient.*(#8|purple).*blue"
+        }
+      ]
+    }
+  ],
+  "running_evals": {
+    "in_claude_ai": "Run each prompt in a fresh conversation. Score qualitatively against success/failure criteria; for `auto: true` criteria, run a script after the output is saved. If any criterion fails, identify which reference file's rule was missed and refine the relevant file.",
+    "iteration_loop": [
+      "1. Run all 6 prompts in fresh conversations (one prompt per conversation to avoid context bleed)",
+      "2. Save each output to evals/results/iteration-N/eval-K/output.html (or .md/.txt for negative tests)",
+      "3. Run scripts/check_assertions.py against each output for `auto: true` criteria",
+      "4. Manually score the `auto: false` criteria",
+      "5. Aggregate: count success_criteria pass-rate per eval; check failure_criteria are all 0",
+      "6. For failures: was the rule unclear in the reference? Was the reference not loaded? Was SKILL.md routing wrong? Was the description ambiguous?",
+      "7. Edit the relevant file(s)",
+      "8. Re-run from step 1"
+    ],
+    "stopping_condition": "All 6 evals pass ≥80% of success_criteria. Failure_criteria triggered: ZERO across all evals. Negative-trigger evals (5, 6): skill loaded ZERO times.",
+    "minimum_runs_per_prompt": 3,
+    "rationale_for_3_runs": "LLM output is stochastic; running each prompt 3 times and reporting median pass-rate is more reliable than a single run."
+  },
+  "future_work": [
+    "Add eval 8: 'industrial dial' test — dashboard request that should use dense mode, NOT polished SaaS (per §3 dial table)",
+    "Add eval 9: very-short request (≤2 sentences) — does skill respect §2C clarification protocol?",
+    "Move eval `ios-model-details-screen` from this file to the sister skill `industrial-data-ios` evals (was incorrectly in v1.0 of this file)"
+  ],
+  "changelog_v1_3": "Fixed 6 lingering references to the pre-3-bucket flat filenames (patterns-math.md, patterns-explainer.md, patterns-charts.md, patterns-numeric.md, patterns-navigation.md, patterns-longform-nav, patterns-asides, components.md) in criteria text — references_should_be_loaded arrays were already correct from v1.2, only prose mentions inside criteria text were stale. Prepended explicit skill invocation to eval 2 and eval 4 prompts: SKILL.md's description was narrowed in v1.9 to exclude bare 'làm dashboard' / 'giải thích X' / 'tạo trang HTML' without explicit invocation or a clear study-note framing — these two prompts now match an allowed trigger path instead of sitting in the excluded zone the narrowing was written for. Added eval 7 (subject-theming-chemistry-redox) to cover the v1.10 theming feature (foundations/palettes.md + foundations/backgrounds.md); its core assertion is the identity-vs-semantic law, not just 'does a color change'. Renumbered the eval-7/8 placeholders in future_work to 8/9 since 7 is now a real eval."
+}
