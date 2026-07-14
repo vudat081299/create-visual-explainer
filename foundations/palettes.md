@@ -133,6 +133,8 @@ The system is two-axis and declarative, so new subjects are cheap:
 
 No component code changes — that is the point of routing identity through one token.
 
+> **A skin is not a palette — don't add an aesthetic family here.** A `data-accent` palette changes *only* the identity hue and freezes everything else (that's this file's whole law, §2). A whole aesthetic family — different fonts, surfaces, *and* accent character (e.g. the editorial paper skin) — is a **tokens-level** override and lives in `foundations/tokens.md` §5.5 under `data-skin`, not here. Rule of thumb: changing one hue → palette (here); changing the fonts or the base surfaces → skin (tokens §5.5). The two axes compose (`data-skin` × `data-accent`), so a subject palette still applies on top of the editorial skin.
+
 ---
 
 ## 6. WCAG for identity hues

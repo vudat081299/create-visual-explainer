@@ -38,11 +38,12 @@ create-visual-explainer/
 │   ├── asides.md
 │   ├── charts.md
 │   └── reader-tools.md
-└── usecases/                      # 4 file — recipe cho từng loại trang
+└── usecases/                      # 5 file — recipe cho từng loại trang
     ├── math-learning.md
     ├── interactive-explainer.md
     ├── longform-study.md
-    └── progressive-disclosure.md
+    ├── progressive-disclosure.md
+    └── analytical-report.md
 ```
 
 ---
@@ -66,7 +67,7 @@ Vai trò: file duy nhất Claude load mặc định khi skill trigger. Chứa:
 ### `foundations/` — nguyên lý xuyên suốt
 
 #### `foundations/tokens.md` (~589 dòng)
-**Vai trò**: design system. Color/typography/spacing/motion tokens cho cả dark mode và light mode.
+**Vai trò**: design system. Color/typography/spacing/motion tokens cho cả dark mode và light mode, cộng **aesthetic skins** (§5.5: default vs editorial — đổi cả font + surface + palette qua `data-skin`).
 **Load khi**: bất kỳ output nào có visual.
 **Quick map sections**:
 - §1 Color tokens (surfaces, text, accents, chart palettes, grid texture, opacity)
@@ -289,6 +290,17 @@ Vai trò: file duy nhất Claude load mặc định khi skill trigger. Chứa:
 - §5 Fallback responsive ≤1024px (sheet hoặc accordion) + print/no-JS reveal (bung `.detail-source` inline, ẩn panel khi in)
 - §6 Accessibility & motion
 - §7 Two-tier reading modes (tab ① Đơn giản / ② Chi tiết) — cùng `data-concept`, tab ① phải tự đủ, disclosure vẫn lồng nhau bên trong tab ②
+
+#### `usecases/analytical-report.md` (~mới)
+**Vai trò**: recipe cho **báo cáo phân tích snapshot** (KPI grid, mỗi chart kèm finding, phần nhận xét, footer nguồn) — người đọc *đọc kết quả* về domain họ đã hiểu, KHÔNG học khái niệm mới. Buộc report vào content pillar (rule 14 + rule 16) để nó là readout chứ không phải dashboard rỗng. Hợp nhất với skin `editorial`.
+**Load khi**: quarterly/metric report, cohort/A-B result, research findings, postmortem, investor update — snapshot để đọc, người đọc đã biết domain.
+**KHÔNG load khi**: trang *dạy* khái niệm (→ explainer), surface *live/real-time* (→ dashboard-chrome dark), 1 con số lẻ (→ trả lời inline).
+**Quick map sections**:
+- §1 Discriminator — report vs explainer vs live dashboard (learn-a-concept vs read-results vs glance-react) + tie-breakers
+- §2 Load when / Do NOT load when
+- §3 Content-pillar binding (vì sao không phải dashboard rỗng — rule 14 findings-per-chart, plot integrity, verification trail)
+- §4 Report anatomy (header → method line → KPI grid → anomaly banner → sectioned charts+findings → findings block → source footer)
+- §5 Editorial pairing + tag caveat (chart đọc từ `--cat-*` không hardcode; tag = ink trên chip tinted, không phải white-on-solid)
 
 ---
 

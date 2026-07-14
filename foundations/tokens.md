@@ -1,8 +1,8 @@
 # Tokens — Color, Typography, Spacing, Motion
 
-Full token reference for both dark (default) and light modes. Read this file whenever generating any visual output.
+Full token reference for both dark (default) and light modes, plus **aesthetic skins** (§5.5) — whole font+surface families selected on a second axis. Read this file whenever generating any visual output.
 
-**Quick map**: §1 Color (surfaces, text, accents, triple-opacity, chart palettes, grid texture) (L9–241) · §2 Typography (font stack, sizes, page header) (L242–353) · §3 Spacing/Radius/Z-index/Breakpoints/Containers (L354–437) · §4 Motion (durations, entry animation, reduced-motion) (L438–495) · §5 Theme switching (HTML setup, toggle, system pref, print) (L496–556) · §6 Accessibility (WCAG ratios, focus, touch targets) (L557–590)
+**Quick map**: §1 Color (surfaces, text, accents, triple-opacity, chart palettes, grid texture) (L9–241) · §2 Typography (font stack, sizes, page header) (L242–353) · §3 Spacing/Radius/Z-index/Breakpoints/Containers (L354–437) · §4 Motion (durations, entry animation, reduced-motion) (L438–495) · §5 Theme switching + §5.5 aesthetic skins (default vs editorial) (L496–end) · §6 Accessibility (WCAG ratios, focus, touch targets)
 
 ---
 
@@ -273,6 +273,8 @@ The grid uses `--hairline` (auto-swaps with theme), so it's subtle in both modes
 ```
 
 **Why these**: Bebas Neue is unmistakable, free, and renders well at large sizes. DM Sans has excellent tabular numerals across 5 weights. JetBrains Mono has best-in-class ligatures.
+
+**These fonts are the *default skin*.** The font vars above are overridden per aesthetic skin (rule 4: one trio per skin). The **editorial** skin swaps them to Space Grotesk + IBM Plex Sans + IBM Plex Mono — see §5.5.
 
 **Single Google Fonts request**:
 ```html
@@ -571,6 +573,107 @@ if (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: 
   .reveal { opacity: 1 !important; animation: none !important; }
 }
 ```
+
+### 5.5 Aesthetic skins — the font + surface family axis
+
+`data-theme` (dark/light) swaps *colors within one visual family*. A **skin** is a second, orthogonal axis (`data-skin`) that swaps the whole family — **fonts + surface character + accent palette together**. It answers a different question: not "dark or light?" but "what *register* does this content speak in?" (the picker is SKILL.md §4).
+
+Two skins ship:
+- **default** (attribute unset) — Data-Dense Pro / Terminal-Core: Bebas Neue + JetBrains Mono over dark industrial surfaces. Everything above this subsection.
+- **editorial** — Editorial Bulletin: Space Grotesk + IBM Plex over warm paper. FT / Economist / Stripe Press lineage. For analytical reports, research write-ups, finance/business, serious technical docs, and reading-heavy study notes.
+
+Select on the root:
+```html
+<html lang="en" data-skin="editorial">
+```
+
+Editorial is a **light/paper family** — it defines its own surfaces, so `data-theme` is a no-op under it. Don't pair `data-skin="editorial"` with `data-theme="dark"`; there is no dark editorial. The default skin keeps the full dark+light `data-theme` behaviour above.
+
+The full editorial token block:
+
+```css
+[data-skin="editorial"] {
+  /* — FONTS (rule 4: one trio per skin, never a system fallback) — */
+  --font-display: 'Space Grotesk', 'Arial', sans-serif;
+  --font-body:    'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', 'SF Mono', Menlo, monospace;
+  /* --font-math unchanged */
+
+  /* — SURFACES: warm paper. Depth reads through RULES, not elevation steps
+       (the editorial move) — so the 3 tiers sit close and the border does the
+       separating. Still obeys rule 2: no box-shadow for chrome. — */
+  --bg:       #F7F6F3;
+  --surface:  #FDFCFA;
+  --card:     #FFFFFF;
+  --border:   #DEDCD6;
+  --hairline: rgba(0,0,0,0.05);
+  --rule-ink: #1B2430;   /* editorial-only: 2px baseline rule under the header */
+  --bg-rgb:      247 246 243;
+  --surface-rgb: 253 252 250;
+  --card-rgb:    255 255 255;
+  --border-rgb:  222 220 214;
+
+  /* — TEXT (all verified on #F7F6F3) — */
+  --text-primary:   #1B2430;  /* 14.5:1 ✓ AAA — body, headings */
+  --text-secondary: #34404F;  /*  9.8:1 ✓ AAA — secondary copy */
+  --text-muted:     #5B6472;  /*  5.5:1 ✓ AA  — captions, labels */
+  --text-dim:       #808995;  /*  3.3:1 ⚠ AA-large only — decorative */
+
+  /* — SEMANTIC ACCENTS: text-safe (each verified as small text on paper).
+       The brighter editorial hues live in the chart palette below, where they
+       are fills not text — the same split this file already uses between its
+       dark (vibrant) and light (darkened) accent columns. — */
+  --accent-green:      #1F7A6D;  /* 4.8:1 ✓ success / definitions */
+  --accent-green-rgb:  31 122 109;
+  --accent-blue:       #3D5A80;  /* 6.5:1 ✓ info / theorems — also identity */
+  --accent-blue-rgb:   61 90 128;
+  --accent-yellow:     #8A6200;  /* 5.1:1 ✓ warning / proof (amber-dark) */
+  --accent-yellow-rgb: 138 98 0;
+  --accent-red:        #C1454B;  /* 4.6:1 ✓ danger */
+  --accent-red-rgb:    193 69 75;
+  --accent-purple:     #6D5B9E;  /* 5.3:1 ✓ examples */
+  --accent-purple-rgb: 109 91 158;
+  --accent-cyan:       #0E7490;  /* 5.0:1 ✓ code-output */
+  --accent-cyan-rgb:   14 116 144;
+
+  /* — IDENTITY: editorial hero = dusty blue (passes AA as the small eyebrow) — */
+  --accent-identity:     var(--accent-blue);
+  --accent-identity-rgb: var(--accent-blue-rgb);
+
+  /* — CHART PALETTE: the muted editorial signature. These are FILLS, so the
+       constraint is mutual distinctness + visibility on --card, not text WCAG.
+       For thin (≤2px) lines, prefer the darker semantic twins above. Muted hues
+       compress the colour space — beyond ~6 series, facet/split, don't add more. — */
+  --cat-1: #3D5A80;  /* dusty blue */
+  --cat-2: #2A9D8F;  /* teal */
+  --cat-3: #E9A13B;  /* amber */
+  --cat-4: #C1454B;  /* brick */
+  --cat-5: #8B7BB8;  /* muted purple */
+  --cat-6: #B0785A;  /* clay */
+  --cat-7: #8A8A3C;  /* olive */
+  --cat-8: #9AA3AD;  /* neutral slate (use last) */
+
+  /* sequential (single-hue blue, light=low) + diverging (brick↔teal, zero=border) */
+  --seq-1: #F2EFE9; --seq-2: #CBD5D8; --seq-3: #90AEB5;
+  --seq-4: #5688A0; --seq-5: #3D5A80; --seq-6: #24384F;
+  --div-neg-3: #C1454B; --div-neg-2: #D98A8D; --div-neg-1: #EBC9CA;
+  --div-zero: #DEDCD6; --div-pos-1: #A9D2CC; --div-pos-2: #5FB0A6; --div-pos-3: #1F7A6D;
+}
+```
+
+**Font link** — replace the default trio's `<link>` from §2.1 with:
+```html
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+```
+
+**Three editorial conventions** (the look isn't only tokens):
+
+1. **Rules, not shadows, not elevation.** A `2px solid var(--rule-ink)` under the page header and `1px solid var(--border)` hairlines carry structure; the 3 surface tiers barely differ on purpose. A clean trick from the source: a KPI grid with `gap:1px; background:var(--border)` and white cells lets the gaps read as hairlines.
+2. **Turn the grid texture off.** `foundations/backgrounds.md` variants assume a dark canvas; on paper set `body::before { display:none }` (or keep a single very-faint hairline grid). Structure comes from borders instead.
+3. **Badge text: dark ink on a tinted chip, not white on solid.** Only `--cat-1` (dusty blue, 7:1) and `--cat-4` (brick, 5:1) clear WCAG with white label text; teal / amber / purple / slate as *solid* backgrounds fail for their label. Default category tags to the triple-opacity chip (solid-color text / 0.08 bg / 0.22 border) so every tag stays readable.
+
+Everything else in this file — spacing, radius, motion, tabular numerals, triple-opacity, the eyebrow→title→subtitle header — is skin-agnostic and applies unchanged.
 
 ---
 

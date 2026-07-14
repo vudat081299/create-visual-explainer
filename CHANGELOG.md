@@ -2,6 +2,27 @@
 
 > Older entries (v1.1–v1.4) live in `CHANGELOG-archive.md` to keep this file scannable. v1.5+ stays here as the active history.
 
+## v1.15 (2026-07-14) — Editorial Bulletin skin + `usecases/analytical-report.md`
+
+User direction: a warm-paper editorial design (FT / Economist / Stripe Press lineage — Space Grotesk + IBM Plex over `#F7F6F3`, muted palette, hairline rules) recurs whenever Claude free-hands a report/dashboard; codify it as a reusable **skin** instead of re-inventing bespoke tokens each time, and add a home for the *report* page-type — without letting it collide with the explainer usecases.
+
+Two orthogonal axes made explicit: **skin** (`data-skin` — font + surface + palette *family*) is distinct from **theme** (`data-theme` — colours within a family) and from **palette** (`data-accent` — identity hue only). The editorial skin is a whole family; SaaS Polish stays the default skin dialed light. Three families is treated as the ceiling.
+
+**New skin — `foundations/tokens.md` §5.5 `[data-skin="editorial"]`**: full token block (fonts, warm-paper surfaces with a `--rule-ink` baseline, WCAG-verified text, text-safe semantic accents with the brighter editorial hues living in the chart palette as fills, dusty-blue identity, categorical/sequential/diverging palettes), the editorial font `<link>`, and three conventions (rules-not-shadows, grid-texture-off, dark-ink-tags-not-white-on-solid). Every colour verified: text AAA/AA on `#F7F6F3`; the bright hues fail as body text by design and are confined to fills.
+
+**New file — `usecases/analytical-report.md`**: the report page-type, bound to the content pillar so it stays a *readout*, not a bare dashboard. Core is the **discriminator** (learn-a-concept → explainer; read-results → report; glance-and-react → live dashboard) with tie-breakers (any teaching ⇒ explainer; unsure ⇒ default explainer; §2C as last resort), Load-when / Do-NOT-load-when, the rule 14 + rule 16 binding, and a generalized report anatomy.
+
+### Wired in
+
+- **rule 4** reworded: "one trio per skin" (default vs editorial), never Inter/Roboto/system-ui — the immutability is now per-skin.
+- **§4** gains an **Aesthetic family** picker (register test: read-&-reason vs glance-&-react vs marketing) above the dense/polished dial; footer family line + siblings updated (adds Editorial Bulletin, FT, Economist, Stripe Press).
+- **§1 skill map**: `tokens.md` row notes §5.5 skins; new `usecases/analytical-report.md` row with the discriminator; task-type table splits **live dashboard** (scan-and-react, dark) from **analytical report** (snapshot-to-read, editorial).
+- **§3 workflow step 6**: pick **family/skin** first, then `data-accent` + `data-bg` within it (editorial ignores `data-bg`).
+- **`foundations/palettes.md`**: note that a skin is *not* a palette — a family (fonts+surfaces) is a tokens-level `data-skin` override, not a `data-accent` entry; the two axes compose.
+- **`MAP.md`**: usecases count 4→5, `analytical-report.md` added to tree + detail entry; tokens note updated for skins.
+
+Net: **1 new skin block (`tokens.md` §5.5) + 1 new usecase file + rule 4 reworded + §4 family picker; no component rewrites (every component already reads the tokens).**
+
 ## v1.14 (2026-07-14) — Structure-first layout: add `foundations/structure.md` + rule 17
 
 User direction: when building any learning page, Claude must actively derive the most logical, coherent macro-layout for the *specific* knowledge — and silently self-check it — instead of defaulting into a template or a task-type bucket. This version adds that missing layer as a new foundation and wires it into both the build path and the verify path.

@@ -31,7 +31,7 @@ Each ref file has a `**Quick map**` line at the top with section line ranges —
 
 | File | Role | Load when |
 |---|---|---|
-| `foundations/tokens.md` | Color / typography / spacing / motion tokens (dark + light) | Any visual output |
+| `foundations/tokens.md` | Color / typography / spacing / motion tokens (dark + light) + aesthetic **skins** (§5.5: default vs editorial) | Any visual output |
 | `foundations/pedagogy.md` | HOW to explain (layered explanation, cognitive load, misconceptions) | **Baseline** for any educational content |
 | `foundations/structure.md` | Derive the page's macro-layout from the *shape* of the knowledge (sequence / comparison / hierarchy / causal / one deep idea / parallel / decision / cycle) — the page-structure analogue of `plot-quality.md`; a mismatched layout is a *structural lie* | **Baseline** for any educational page — read *before* picking usecases |
 | `foundations/verification.md` | Pre-output verify (math, code, citation) + verification trail format | **Mandatory** for any math/code/factual claim in a deliverable |
@@ -58,6 +58,7 @@ Each ref file has a `**Quick map**` line at the top with section line ranges —
 | `usecases/math-learning.md` | KaTeX setup, theorem/proof boxes, equation containers, derivations | Math/DS tutorials, equation-heavy docs |
 | `usecases/interactive-explainer.md` | Stage+controls, sliders, walkthroughs, sandbox (Distill-style interactive concept page) | Page has interactive demo |
 | `usecases/longform-study.md` | TOC (sticky right rail), reading-progress bar, section anchor links | Long-form pages with ≥3 H2 sections |
+| `usecases/analytical-report.md` | KPI grid, findings-per-chart, snapshot-report structure with content-pillar discipline (rule 14 + rule 16) | **Report / findings readout** — reader comes to *read results* about a domain they already understand, NOT to learn a new concept (that routes to an explainer). Discriminator + Load-when in the file |
 | `usecases/progressive-disclosure.md` | Overview-first + brief/expand right detail panel (advance organizer + progressive disclosure): keep the main column skimmable, depth one click away | **Default reading layout for any multi-concept explainer (§2D)** — code, supplementary diagrams/examples, Layer-3 derivations and extra detail go in the right panel; main column stays the skimmable spine. Single short concept → inline `<details>` from `components/asides.md` instead |
 
 ### Other
@@ -85,7 +86,8 @@ For other task types, pick the row that matches:
 |---|---|
 | **DS learning page / longform study note** (multi-section, navigable) | `foundations/tokens` + `components/core` + `foundations/structure` + `usecases/math-learning` + `usecases/longform-study` + `usecases/progressive-disclosure` (default for multi-concept — brief in main column, depth in right panel; §2D) + `components/reader-tools` (≥5 concepts; §2E) + `components/asides` + `foundations/pedagogy` + `foundations/verification` (+ `usecases/interactive-explainer` if interactive, + `components/charts` + `foundations/plot-quality` if charts) |
 | **Interactive concept explainer** (no longform prose) | `foundations/tokens` + `components/core` + `usecases/math-learning` + `usecases/interactive-explainer` + `foundations/pedagogy` + `foundations/verification` |
-| **Dashboard / analytics UI** | `foundations/tokens` + `components/core` + `components/charts` + `components/numeric` + `components/dashboard-chrome` + `components/navigation` + `foundations/plot-quality` |
+| **Dashboard / analytics UI** (live / monitoring — scan-and-react) | `foundations/tokens` + `components/core` + `components/charts` + `components/numeric` + `components/dashboard-chrome` + `components/navigation` + `foundations/plot-quality` |
+| **Analytical report / findings readout** (snapshot, reader already knows the domain) | `foundations/tokens` (+ `data-skin="editorial"`, §4) + `components/core` + `components/charts` + `components/numeric` + `usecases/analytical-report` + `foundations/plot-quality` + `foundations/verification` |
 | **Marketing / landing / blog post** | `foundations/tokens` + `components/core` (+ `components/navigation` if has nav) |
 | **Trivial inline HTML** | None — use §4 cheatsheet directly |
 | **Math/code claim, chat-side** (not building a page) | `foundations/verification` only |
@@ -101,7 +103,7 @@ These give the design 80% of its visual coherence. If they conflict with what th
 1. **Triple-opacity rule.** For chip/badge/pill chrome, every accent at solid (text/icons), 0.08–0.10 (bg), 0.20–0.25 (border) — no fourth value. Sanctioned exceptions (different use cases, NOT chip chrome): focus rings 0.15–0.30, modal backdrops 0.60–0.85, section-highlight box bg 0.05–0.07. See `foundations/tokens.md` §1.4.
 2. **3-tier surface depth, no shadows for chrome.** `--bg → --surface → --card`. `box-shadow` only for true overlays.
 3. **Tabular numerals everywhere numeric.** Tables, stat cards, chart axes, code, `input[type=number]`.
-4. **Distinctive typography stack — never substitute.** Bebas Neue + DM Sans + JetBrains Mono.
+4. **Distinctive typography stack — one trio per skin, never fall back to system defaults.** Default skin: Bebas Neue + DM Sans + JetBrains Mono. Editorial skin: Space Grotesk + IBM Plex Sans + IBM Plex Mono (`foundations/tokens.md` §5.5). Pick one trio per page, don't mix them on the same surface, and never substitute Inter / Roboto / system-ui — that substitution is what breaks the aesthetic point of view.
 5. **Eyebrow → giant title → small subtitle composition** for every page header. Exactly ONE accent-colored keyword in the title.
 6. **No decorative gradients in chrome.** Gradients allowed only inside data-viz containers.
 7. **WCAG-verified text only.** `--text-dim` is decorative-only (≥18pt or ≥14pt-bold).
@@ -233,7 +235,7 @@ All of this joins on the `[data-concept]` contract (`components/reader-tools.md`
 3. **Read content references before visual** (`foundations/pedagogy.md`, `foundations/plot-quality.md`, `foundations/verification.md`). Content rules organize the page; visual rules just style it.
 4. **Plan structure, content + disclosure split** — *first* name the knowledge's intrinsic shape and build the macro-layout that makes that relationship visible (rule 17 + `foundations/structure.md`: sequence→stepped spine, comparison→parallel columns, hierarchy→nested sections, cause→effect→flow diagram, one deep idea→single column, parallel set→grid+TOC, decision→tree, cycle→loop diagram). Then, *within* that structure, apply rules 11-13: pick comprehension-first form (rule 13), layer the explanation Layer 1→2→3 (rule 11 + `foundations/pedagogy.md` §2), one worked number before each formal claim (rule 12), identify likely misconception (`foundations/pedagogy.md` §4) and plan a `.warning` box. Then apply §2D: for each concept decide what stays in the brief (Layer 1+2 + key formula + essential visual) vs. what goes to the disclosure tier (code, supplementary diagrams, Layer-3, edge cases, extra detail). Pick the mechanism: right panel (multi-concept) or inline `<details>` (single concept).
 5. **Plan navigation + reader tooling** — ≥3 H2 sections → TOC required (right-rail for ≥6, inline list for 3-5; `usecases/longform-study.md`). ≥5 concepts → reader-tooling layer required (§2E, `components/reader-tools.md`): give every markable unit a stable `data-concept` id *now*, since ticks, focus scroll-spy, notes and the detail panel all join on it.
-6. **Pick starting point + theme set.** Fresh page → start from `assets/starter-template.html`. Editing existing page → skip the template; read visual references for any element already present. Then pick a **theme set** so pages don't all look the same: set `data-accent` (identity palette) + `data-bg` (background texture) on `<html>` — default is to infer from the subject (math→blue, physics→cyan, chemistry→orange, probability→purple, nature→green+contour, crypto→amber+scanline; unclear→curated random). User choice always wins. See `foundations/palettes.md` + `foundations/backgrounds.md`. This only changes the *identity* accent — semantic colors (success/danger/chart palettes) stay fixed.
+6. **Pick starting point + family + theme set.** Fresh page → start from `assets/starter-template.html`. Editing existing page → skip the template; read visual references for any element already present. First pick the **family/skin** (`data-skin` — default vs editorial, §4 register test): reports / research / serious docs / reading-heavy study → `data-skin="editorial"`; dashboards / dev-UI / most explainers → default. *Then within the family* pick a **theme set** so pages don't all look the same: set `data-accent` (identity palette) + `data-bg` (background texture) on `<html>` — default is to infer from the subject (math→blue, physics→cyan, chemistry→orange, probability→purple, nature→green+contour, crypto→amber+scanline; unclear→curated random). User choice always wins. See `foundations/palettes.md` + `foundations/backgrounds.md`. (Editorial largely ignores `data-bg` — its grid texture is off; structure comes from rules.) This only changes the *identity* accent — semantic colors (success/danger/chart palettes) stay fixed.
 7. **Pick the output channel.** HTML output from this skill is almost always longform (multi-section, has TOC/sliders/charts) — output as an **HTML artifact** so the user can view/download/edit it. Inline visualizer (`visualize:show_widget`) is OK *only* when the page is small (≤300 lines, single concept, no TOC) AND fits the flow of inline scrolling. Never embed the full page as a code block in chat.
 8. **Apply quality checklists during build** — rule 14 + `foundations/plot-quality.md` §2 for every plot; rule 15 + `foundations/verification.md` §1 for every formula, numerical claim, or code snippet.
 9. **Self-test before output** — walk these checklists in order: `foundations/pedagogy.md` §9 (pedagogy/content) → `foundations/plot-quality.md` §2 (every plot) → `foundations/verification.md` §1 + §8 (math/code/factual + handoff). Confirm no unsolicited optional content (§2C), and run the §2D self-sufficiency test (briefs readable alone; the core teaching visual is inline, not hidden) plus the `foundations/structure.md` §4 structure-match check — silent, no line in the reply — that the macro-layout expresses the knowledge's true shape (a process is not laid out as an unordered set; a comparison is not split into sequential essays). If the page ships reader tooling (§2E), confirm: focus mode off by default, no auto-ticking, dim-not-blur, every `localStorage` call guarded, notes exportable.
@@ -294,9 +296,23 @@ Most-used tokens — Claude can use them inline without loading `foundations/tok
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
 ```
 
+### Aesthetic family — which skin (the register axis)
+
+Before the dense/polished dial below, pick the **family** — the font + surface + palette skin (`foundations/tokens.md` §5.5). This is a *different* question from density: it's about the register the content speaks in. One-line test:
+
+> Does the reader come to **read & reason** (→ Editorial) or to **glance & react** (→ Data-Dense)? Or is it product **marketing / general reading** (→ SaaS Polish)?
+
+| Family | How to select | Voice | Use for |
+|---|---|---|---|
+| **Data-Dense Pro** (default) | `data-skin` unset · `data-theme="dark"` | Terminal, industrial, scan-and-react | Monitoring, dev tools, live dashboards, technical UI |
+| **SaaS Polish** | default skin · `data-theme="light"` + polished dial | Clean, calm, spacious | Product marketing, landing pages, clean docs, general-audience longform |
+| **Editorial Bulletin** | `data-skin="editorial"` | Authoritative, considered, read-and-reason | Analytical reports, research / whitepapers, finance / business, serious technical docs, reading-heavy math/DS study notes |
+
+Editorial and the default are **different skins** (whole font+surface families). SaaS Polish is *not* a separate skin — it's the default skin dialed light + airy. Three families is roughly the ceiling: past this the skill stops being one point of view and becomes a theme dropdown. Note that Editorial is often *more legible than dark* for a multi-hour study session, so it's a real choice for reading-heavy learning pages, not just dashboards — but its raison d'être is still content that needs to read as authoritative.
+
 ### Aesthetic dial — dense vs polished
 
-The same tokens can be tuned toward two ends. Pick one mode per page; don't mix on the same surface.
+The same tokens can be tuned toward two ends. Pick one mode per page; don't mix on the same surface. The dial operates *inside* whichever family you picked above (an Editorial report runs dense; an Editorial study note runs polished body).
 
 | Dial | Dense industrial (default — ClickHouse/Sentry/Grafana) | Polished SaaS (GitHub/Tailwind/Notion) |
 |---|---|---|
@@ -361,6 +377,6 @@ The same tokens can be tuned toward two ends. Pick one mode per page; don't mix 
 
 ---
 
-**Aesthetic family**: Data-Dense Pro (default) / SaaS Polish (longform & marketing) · **Closest visual siblings**: ClickHouse, PostHog, Sentry, Grafana, Supabase, GitHub, Tailwind, Notion, Linear
+**Aesthetic family**: Data-Dense Pro (default) / SaaS Polish (longform & marketing) / Editorial Bulletin (reports, research, serious docs — `data-skin="editorial"`) · **Closest visual siblings**: ClickHouse, PostHog, Sentry, Grafana, Supabase, GitHub, Tailwind, Notion, Linear, Financial Times, The Economist, Stripe Press
 **Pedagogy lineage**: Distill.pub, 3Blue1Brown, Brilliant.org, Bartosz Ciechanowski, Feynman
 **Sister skill**: `industrial-data-ios` for iOS UI (same tokens, Swift mirror)
